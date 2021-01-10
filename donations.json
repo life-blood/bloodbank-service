@@ -1,0 +1,25 @@
+[
+  {
+    "DonationID": 1,
+    "UserID": "Ivan",
+    "BloodCenter": "РАЙОНЕН Ц-Р ПО ТРАНСФУЗИОННА ХЕМАТОЛОГИЯ - Стара Загора",
+    "Amount": "140 mil.",
+    "Date": "23.02.2020",
+    "Status": "Completed"
+  },
+  {
+    "DonationID": 2,
+    "UserID": "Ivan",
+    "BloodCenter": "РАЙОНЕН Ц-Р ПО ТРАНСФУЗИОННА ХЕМАТОЛОГИЯ - Стара Загора",
+    "Date": "23.02.2020",
+    "Amount": "310 mil.",
+    "Status": "Completed"
+  },
+  {
+    "DonationID": 3,
+    "UserID": "Ivan",
+    "BloodCenter": "РАЙОНЕН Ц-Р ПО ТРАНСФУЗИОННА ХЕМАТОЛОГИЯ - Стара Загора",
+    "Date": "23.02.2020",
+    "Status": "In Progress"
+  }
+]
