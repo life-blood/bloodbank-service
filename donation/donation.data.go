@@ -23,7 +23,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("%d donations laoded... \n", len(donationMap.m))
+	fmt.Printf("%d donations laoded... \n", len(donationMap.m))
 }
 
 func loadDonationMap() (map[int]Donation, error) {

@@ -1,6 +1,7 @@
 package donation
 
 import (
+	"bloodbankservice/cors"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -15,8 +16,8 @@ const donationsPath = "donations"
 func SetupRoutes(apiBasePath string) {
 	donationsHandler := http.HandlerFunc(handleDonation)
 	donationHandler := http.HandlerFunc(handleDonations)
-	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, donationsPath), donationsHandler)
-	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, donationsPath), donationHandler)
+	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, donationsPath), cors.Middleware(donationsHandler))
+	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, donationsPath), cors.Middleware(donationHandler))
 }
 
 func handleDonations(w http.ResponseWriter, r *http.Request) {
