@@ -9,7 +9,7 @@ var DbConnection *sql.DB
 
 func SetupDatabase() {
 	var err error
-	DbConnection, err = sql.Open("mysql", "root:passwordb@tcp(127.0.0.1:3306)/bloodbankdb")
+	DbConnection, err = sql.Open("mysql", "root:R580122b@tcp(127.0.0.1:3306)/bloodbankdb")
 	if err != nil {
 		log.Fatal(err)
 	}

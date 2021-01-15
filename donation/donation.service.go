@@ -14,10 +14,10 @@ const donationsPath = "donations"
 
 // SetupRoutes :
 func SetupRoutes(apiBasePath string) {
-	donationsHandler := http.HandlerFunc(handleDonation)
-	donationHandler := http.HandlerFunc(handleDonations)
-	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, donationsPath), cors.Middleware(donationsHandler))
+	donationsHandler := http.HandlerFunc(handleDonations)
+	donationHandler := http.HandlerFunc(handleDonation)
 	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, donationsPath), cors.Middleware(donationHandler))
+	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, donationsPath), cors.Middleware(donationsHandler))
 }
 
 func handleDonations(w http.ResponseWriter, req *http.Request) {
@@ -48,7 +48,7 @@ func handleDonations(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		_, err = addOrUpdateDonation(donation)
+		_, err = insertDonation(donation)
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -76,7 +76,11 @@ func handleDonation(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case http.MethodGet:
-		donation := getDonation(donationID)
+		donation, err := getDonation(donationID)
+		if err != nil {
+			log.Print(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		if donation == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -104,7 +108,7 @@ func handleDonation(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		_, err = addOrUpdateDonation(donation)
+		err = updateDonation(donation)
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)

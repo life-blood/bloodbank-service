@@ -3,64 +3,50 @@ package donation
 import (
 	"bloodbankservice/database"
 	"database/sql"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
-	"sort"
-	"sync"
 )
 
-// used to hold donation list in memory
-var donationMap = struct {
-	sync.RWMutex
-	m map[int]Donation
-}{m: make(map[int]Donation)}
+func getDonation(donationID int) (*Donation, error) {
+	var selectQuery string = `SELECT 
+	donationId,
+	userId,
+	bloodType, 
+	bloodCenter, 
+	amount,
+	date,
+	status
+	FROM donations
+	WHERE donationId = ?
+	`
+	row := database.DbConnection.QueryRow(selectQuery, donationID)
+	donation := &Donation{}
 
-func init() {
-	fmt.Println("Loading available donations")
-	donMap, err := loadDonationMap()
-	donationMap.m = donMap
-	if err != nil {
-		log.Fatal(err)
+	err := row.Scan(
+		&donation.DonationID,
+		&donation.UserID,
+		&donation.BloodType,
+		&donation.BloodCenter,
+		&donation.Amount,
+		&donation.Date,
+		&donation.Status,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
 	}
-	fmt.Printf("%d donations laoded... \n", len(donationMap.m))
+
+	return donation, nil
 }
 
-func loadDonationMap() (map[int]Donation, error) {
-	fileName := "donations.json"
-	_, err := os.Stat(fileName)
-	if os.IsNotExist(err) {
-		return nil, fmt.Errorf("file [%s] does not exist", fileName)
-	}
-
-	file, _ := ioutil.ReadFile(fileName)
-	donationList := make([]Donation, 0)
-	err = json.Unmarshal([]byte(file), &donationList)
+func removeDonation(donationID int) error {
+	_, err := database.DbConnection.Query(`DELETE FROM donations where WHERE donationId = ?`, donationID)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	donMap := make(map[int]Donation)
-	for i := 0; i < len(donationList); i++ {
-		donMap[donationList[i].DonationID] = donationList[i]
-	}
-	return donMap, nil
-}
 
-func getDonation(donationID int) *Donation {
-	donationMap.RLock()
-	defer donationMap.RUnlock()
-	if donation, ok := donationMap.m[donationID]; ok {
-		return &donation
-	}
 	return nil
-}
-
-func removeDonation(donationID int) {
-	donationMap.Lock()
-	defer donationMap.Unlock()
-	delete(donationMap.m, donationID)
 }
 
 func getDonationList(userID string) ([]Donation, error) {
@@ -150,38 +136,58 @@ func getDonationListByUserID(userID string) ([]Donation, error) {
 	return donations, nil
 }
 
-func getDonationIds() []int {
-	donationMap.RLock()
-	donationIds := []int{}
-	for key := range donationMap.m {
-		donationIds = append(donationIds, key)
+func updateDonation(donation Donation) error {
+	_, err := database.DbConnection.Exec(`UPDATE donations SET
+	userId=?,
+	bloodType=?, 
+	bloodCenter=?, 
+	amount=?,
+	date=?,
+	status=?
+	WHERE donationId = ?`,
+		donation.UserID,
+		donation.BloodType,
+		donation.BloodCenter,
+		donation.Amount,
+		donation.Date,
+		donation.Status,
+		donation.DonationID,
+	)
+
+	if err != nil {
+		return err
 	}
-	donationMap.RUnlock()
-	sort.Ints(donationIds)
-	return donationIds
+
+	return nil
 }
 
-func getNextDonationID() int {
-	donationIds := getDonationIds()
-	return donationIds[len(donationIds)-1] + 1
-}
+func insertDonation(donation Donation) (int, error) {
+	result, err := database.DbConnection.Exec(`INSERT INTO donations
+	(userId, 
+		bloodType, 
+		bloodCenter, 
+		amount, 
+		date, 
+		status) VALUES (?, ?, ?, ?, ?, ?)`,
+		donation.UserID,
+		donation.BloodType,
+		donation.BloodCenter,
+		donation.Amount,
+		donation.Date,
+		donation.Status)
 
-func addOrUpdateDonation(donation Donation) (int, error) {
-	// if the donation id is set, update, otherwise add
-	addOrUpdateID := -1
-	if donation.DonationID > 0 {
-		oldDonation := getDonation(donation.DonationID)
-		// if it exists, replace it, otherwise return error
-		if oldDonation == nil {
-			return 0, fmt.Errorf("donation id [%d] doesn't exist", donation.DonationID)
-		}
-		addOrUpdateID = donation.DonationID
-	} else {
-		addOrUpdateID = getNextDonationID()
-		donation.DonationID = addOrUpdateID
+	if err != nil {
+		log.Println(err)
+		return 0, nil
 	}
-	donationMap.Lock()
-	donationMap.m[addOrUpdateID] = donation
-	donationMap.Unlock()
-	return addOrUpdateID, nil
+
+	log.Println("Inserting donation")
+
+	log.Println(donation)
+
+	insertID, err := result.LastInsertId()
+	if err != nil {
+		return 0, nil
+	}
+	return int(insertID), nil
 }
