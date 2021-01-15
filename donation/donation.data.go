@@ -1,6 +1,8 @@
 package donation
 
 import (
+	"bloodbankservice/database"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -61,14 +63,91 @@ func removeDonation(donationID int) {
 	delete(donationMap.m, donationID)
 }
 
-func getDonationList() []Donation {
-	donationMap.RLock()
-	donations := make([]Donation, 0, len(donationMap.m))
-	for _, value := range donationMap.m {
-		donations = append(donations, value)
+func getDonationList(userID string) ([]Donation, error) {
+	var selectQuery string = `SELECT 
+	donationId,
+	userId,
+	bloodType, 
+	bloodCenter, 
+	amount,
+	date,
+	status
+	FROM donations
+	`
+
+	var results *sql.Rows
+	var err error
+	if userID == "" {
+		results, err = database.DbConnection.Query(selectQuery)
+	} else {
+		selectQuery += `WHERE userId = ?`
+		results, err = database.DbConnection.Query(selectQuery, userID)
 	}
-	donationMap.RUnlock()
-	return donations
+
+	if err != nil {
+		return nil, err
+	}
+
+	donations := make([]Donation, 0)
+	for results.Next() {
+		var donation Donation
+		err = results.Scan(&donation.DonationID,
+			&donation.UserID,
+			&donation.BloodType,
+			&donation.BloodCenter,
+			&donation.Amount,
+			&donation.Date,
+			&donation.Status)
+
+		if err != nil {
+			return nil, err
+		}
+
+		donations = append(donations, donation)
+	}
+
+	defer results.Close()
+
+	return donations, nil
+}
+
+func getDonationListByUserID(userID string) ([]Donation, error) {
+	results, err := database.DbConnection.Query(`SELECT 
+	donationId,
+	userId,
+	bloodType, 
+	bloodCenter, 
+	amount,
+	date,
+	status
+	FROM donations
+	WHERE userId= ?`, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	donations := make([]Donation, 0)
+	for results.Next() {
+		var donation Donation
+		err = results.Scan(&donation.DonationID,
+			&donation.UserID,
+			&donation.BloodType,
+			&donation.BloodCenter,
+			&donation.Amount,
+			&donation.Date,
+			&donation.Status)
+
+		if err != nil {
+			return nil, err
+		}
+
+		donations = append(donations, donation)
+	}
+
+	defer results.Close()
+
+	return donations, nil
 }
 
 func getDonationIds() []int {

@@ -20,10 +20,18 @@ func SetupRoutes(apiBasePath string) {
 	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, donationsPath), cors.Middleware(donationHandler))
 }
 
-func handleDonations(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
+func handleDonations(w http.ResponseWriter, req *http.Request) {
+	switch req.Method {
 	case http.MethodGet:
-		donationList := getDonationList()
+		// Filter by usedId if /donations/?userId='ID'
+		param1 := req.URL.Query().Get("userId")
+		donationList, err := getDonationList(param1)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Fatal(err)
+			return
+		}
 		j, err := json.Marshal(donationList)
 		if err != nil {
 			log.Fatal(err)
@@ -34,7 +42,7 @@ func handleDonations(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodPost:
 		var donation Donation
-		err := json.NewDecoder(r.Body).Decode(&donation)
+		err := json.NewDecoder(req.Body).Decode(&donation)
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
