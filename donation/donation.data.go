@@ -3,6 +3,7 @@ package donation
 import (
 	"bloodbankservice/database"
 	"database/sql"
+	"fmt"
 	"log"
 )
 
@@ -41,8 +42,9 @@ func getDonation(donationID int) (*Donation, error) {
 }
 
 func removeDonation(donationID int) error {
-	_, err := database.DbConnection.Query(`DELETE FROM donations where WHERE donationId = ?`, donationID)
+	_, err := database.DbConnection.Query(`DELETE FROM donations WHERE donationId = ?`, donationID)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 

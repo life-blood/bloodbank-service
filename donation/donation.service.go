@@ -16,8 +16,8 @@ const donationsPath = "donations"
 func SetupRoutes(apiBasePath string) {
 	donationsHandler := http.HandlerFunc(handleDonations)
 	donationHandler := http.HandlerFunc(handleDonation)
-	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, donationsPath), cors.Middleware(donationHandler))
 	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, donationsPath), cors.Middleware(donationsHandler))
+	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, donationsPath), cors.Middleware(donationHandler))
 }
 
 func handleDonations(w http.ResponseWriter, req *http.Request) {
@@ -96,7 +96,7 @@ func handleDonation(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-	case http.MethodPut:
+	case http.MethodPost:
 		var donation Donation
 		err := json.NewDecoder(r.Body).Decode(&donation)
 		if err != nil {
@@ -115,6 +115,7 @@ func handleDonation(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case http.MethodDelete:
+		log.Printf("Removing donation with ID %d", donationID)
 		removeDonation(donationID)
 
 	case http.MethodOptions:
