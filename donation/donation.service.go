@@ -23,7 +23,7 @@ func SetupRoutes(apiBasePath string) {
 func handleDonations(w http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case http.MethodGet:
-		// Filter by usedId if /donations/?userId='ID'
+		// Filter by usedId if /donations?userId='ID'
 		param1 := req.URL.Query().Get("userId")
 		donationList, err := getDonationList(param1)
 
