@@ -33,8 +33,9 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	database.SetupDatabase()
-
+	db, err := database.GetDbConnection()
+	donationRepo := donation.NewDonationMySQL(db)
+	donation.DonationService = donation.NewService(donationRepo)
 	donation.SetupRoutes(apiBasePath)
 
 	port := getPort()

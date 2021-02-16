@@ -12,10 +12,14 @@ import (
 
 const donationsPath = "donations"
 
+//DonationService provide donation functionalities
+var DonationService *Service
+
 // SetupRoutes :
 func SetupRoutes(apiBasePath string) {
 	donationsHandler := http.HandlerFunc(handleDonations)
 	donationHandler := http.HandlerFunc(handleDonation)
+
 	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, donationsPath), cors.Middleware(donationsHandler))
 	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, donationsPath), cors.Middleware(donationHandler))
 }
@@ -25,7 +29,7 @@ func handleDonations(w http.ResponseWriter, req *http.Request) {
 	case http.MethodGet:
 		// Filter by usedId if /donations?userId='ID'
 		param1 := req.URL.Query().Get("userId")
-		donationList, err := getDonationList(param1)
+		donationList, err := DonationService.GetDonationList(param1)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -48,7 +52,7 @@ func handleDonations(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		_, err = insertDonation(donation)
+		_, err = DonationService.CreateDonation(&donation)
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -76,13 +80,11 @@ func handleDonation(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case http.MethodGet:
-		donation, err := getDonation(donationID)
+		log.Printf("Retrieving donation by id %d", donationID)
+		donation, err := DonationService.GetDonation(donationID)
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusInternalServerError)
-		}
-		if donation == nil {
-			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		j, err := json.Marshal(donation)
@@ -93,9 +95,8 @@ func handleDonation(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err = w.Write(j)
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 		}
-
 	case http.MethodPost:
 		var donation Donation
 		err := json.NewDecoder(r.Body).Decode(&donation)
@@ -108,7 +109,7 @@ func handleDonation(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		err = updateDonation(donation)
+		err = DonationService.UpdateDonation(&donation)
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -116,8 +117,7 @@ func handleDonation(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodDelete:
 		log.Printf("Removing donation with ID %d", donationID)
-		removeDonation(donationID)
-
+		DonationService.DeleteDonation(donationID)
 	case http.MethodOptions:
 		return
 	default:

@@ -14,18 +14,12 @@ const (
 	dbName = "DB_NAME"
 )
 
-var DbConnection *sql.DB
-
-func SetupDatabase() {
+func GetDbConnection() (*sql.DB, error) {
 	serverName := fmt.Sprintf("localhost:%s", os.Getenv(dbPort))
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s)/%s",
 		os.Getenv(dbUser),
 		os.Getenv(dbPass),
 		serverName, os.Getenv(dbName))
 	log.Printf("Trying to connect to database with %s", connectionString)
-	var err error
-	DbConnection, err = sql.Open("mysql", connectionString)
-	if err != nil {
-		log.Fatal(err)
-	}
+	return sql.Open("mysql", connectionString)
 }
