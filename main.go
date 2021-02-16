@@ -12,9 +12,10 @@ import (
 	"bloodbankservice/database"
 )
 
+//bloodbank service base URL path
 const apiBasePath = "/api"
 
-// Get the Port from the environment so we can run on Heroku
+//Get the Port from the environment so we the service can be run on Heroku
 func getPort() string {
 	var port = os.Getenv("PORT")
 	// Set a default port if there is nothing in the environment
@@ -26,18 +27,25 @@ func getPort() string {
 }
 
 func main() {
-	// load .env file from given path
-	// we keep it empty it will load .env from current directory
+	//load .env file from given path
+	//we keep it empty it will load .env from current directory
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
+	//Create database connection
 	db, err := database.GetDbConnection()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Initialize donation service
 	donationRepo := donation.NewDonationMySQL(db)
 	donation.DonationService = donation.NewService(donationRepo)
 	donation.SetupRoutes(apiBasePath)
 
+	//Setup the backend service
 	port := getPort()
 	err = http.ListenAndServe(port, nil)
 	if err != nil {

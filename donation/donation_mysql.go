@@ -5,20 +5,20 @@ import (
 	"log"
 )
 
-//MySQL repo layer
-type MySQL struct {
+//RepoDatabaseLayer repo
+type RepoDatabaseLayer struct {
 	db *sql.DB
 }
 
 //NewDonationMySQL create new repository
-func NewDonationMySQL(db *sql.DB) *MySQL {
-	return &MySQL{
+func NewDonationMySQL(db *sql.DB) *RepoDatabaseLayer {
+	return &RepoDatabaseLayer{
 		db: db,
 	}
 }
 
 //Get donation by ID
-func (r *MySQL) Get(id int) (*Donation, error) {
+func (r *RepoDatabaseLayer) Get(id int) (*Donation, error) {
 	stmt, err := r.db.Prepare(`SELECT 
 	donationId,
 	userId,
@@ -48,7 +48,7 @@ func (r *MySQL) Get(id int) (*Donation, error) {
 }
 
 // Create a donation
-func (r *MySQL) Create(d *Donation) (int, error) {
+func (r *RepoDatabaseLayer) Create(d *Donation) (int, error) {
 	result, err := r.db.Exec(`INSERT INTO donations
 	(userId, 
 		bloodType, 
@@ -76,7 +76,7 @@ func (r *MySQL) Create(d *Donation) (int, error) {
 }
 
 //Update a donation
-func (r *MySQL) Update(d *Donation) error {
+func (r *RepoDatabaseLayer) Update(d *Donation) error {
 	_, err := r.db.Exec(`UPDATE donations SET
 	userId=?,
 	bloodType=?, 
@@ -102,7 +102,7 @@ func (r *MySQL) Update(d *Donation) error {
 }
 
 //Delete a donation
-func (r *MySQL) Delete(donationID int) error {
+func (r *RepoDatabaseLayer) Delete(donationID int) error {
 	_, err := r.db.Query(`DELETE FROM donations WHERE donationId = ?`, donationID)
 	if err != nil {
 		log.Print(err)
@@ -113,7 +113,7 @@ func (r *MySQL) Delete(donationID int) error {
 }
 
 //GetDonationList retrieve all donation for current userID
-func (r *MySQL) GetDonationList(userID string) ([]Donation, error) {
+func (r *RepoDatabaseLayer) GetDonationList(userID string) ([]Donation, error) {
 	var selectQuery string = `SELECT 
 	donationId,
 	userId,

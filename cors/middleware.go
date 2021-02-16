@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// Middleware :
+//Middleware to enable Cross-Origin Resource Sharing
 func Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")

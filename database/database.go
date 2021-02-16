@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+//Configured from .env configuration filed
 const (
 	dbUser = "DB_USER"
 	dbPass = "DB_PASS"
@@ -14,6 +15,7 @@ const (
 	dbName = "DB_NAME"
 )
 
+//GetDbConnection retrieve sql datab
 func GetDbConnection() (*sql.DB, error) {
 	serverName := fmt.Sprintf("localhost:%s", os.Getenv(dbPort))
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s)/%s",
