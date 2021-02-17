@@ -13,10 +13,10 @@ See project docs: https://github.com/life-blood/documentation
 Configure Local MySql Server and setup credentials in .env file
 or have configured environment varibales
 
-`DB_PORT=3306`
-`DB_USER=root`
-`DB_PASS=password`
-`DB_NAME=databasename`
+`DB_PORT=3306` <br/>
+`DB_USER=root` <br/>
+`DB_PASS=password` <br/>
+`DB_NAME=bloodbankdb` <br/>
 
 Run `db-init.sql` script and initialize the database
 
@@ -24,7 +24,7 @@ Start the server
 `$ go run ./main.g`
 
 Run tests
-`$go test ./...`
+`$ go test ./...`
 
 
 Follow the instruction to configure UI and LifeBlood microservice
