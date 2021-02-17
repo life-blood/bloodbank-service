@@ -21,13 +21,13 @@ or have configured environment varibales
 Run `db-init.sql` script and initialize the database
 
 Start the server
-`$ go run ./main.g`
+`$ go run ./main.go`
 
 Run tests
 `$ go test ./...`
 
 
-Follow the instruction to configure UI and LifeBlood microservice
+Follow the instructions to configure UI and LifeBlood microservice
 
 - https://github.com/life-blood/lifeblood-ui
 - https://github.com/life-blood/accounts-service
